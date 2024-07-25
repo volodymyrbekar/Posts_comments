@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # internal apps
     'posts',
     'comments',
+    'users',
 
 ]
 
@@ -59,6 +60,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'posts_comments_api.urls'
+
+CORS_URLS_REGEX = r"^/api/.*$"  # only allow CORS for /api/ endpoints
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3080",  # some js app
+    "http://127.0.0.1:3000",  # js app
+]
 
 TEMPLATES = [
     {
