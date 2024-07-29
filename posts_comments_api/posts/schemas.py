@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from ninja import Schema
 
@@ -7,6 +8,7 @@ class PostsEntryCreateSchema(Schema):
     # Post data
     title: str
     content: str
+    user_id: int
 
 
 class PostsEntryListSchema(Schema):
@@ -14,6 +16,7 @@ class PostsEntryListSchema(Schema):
     id: int
     title: str
     content: str
+    user_id: int
 
 
 class PostsEntryDetailSchema(Schema):
@@ -23,12 +26,12 @@ class PostsEntryDetailSchema(Schema):
     content: str
     updated_at: datetime
     created_at: datetime
+    user_id: int
 
 
 class PostsEntryUpdateSchema(Schema):
-    id: int
-    title: str
-    content: str
+    title: Optional[str] = None
+    content: Optional[str] = None
 
 
 class PostsEntryDeleteSchema(Schema):
