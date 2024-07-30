@@ -26,7 +26,3 @@ def list_posts(request):
     print(request)
     return "List of posts"
 
-
-@api.get("/user", response=UserSchema, auth=JWTAuth())
-def get_user(request):
-    return request.user
