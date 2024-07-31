@@ -5,14 +5,14 @@ from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.controller import NinjaJWTDefaultController
 from posts.api import router as posts_router
 from users.api import router as users_router
-
+from comments.api import router as comments_router
 
 
 api = NinjaExtraAPI()
 api.register_controllers(NinjaJWTDefaultController)
-api.add_router("/posts/", posts_router)
 api.add_router('/users/', users_router)
-
+api.add_router('/posts/', posts_router)
+api.add_router('/comments/', comments_router)
 
 
 class UserSchema(Schema):
@@ -22,7 +22,7 @@ class UserSchema(Schema):
 
 
 @api.get("/hello")
-def list_posts(request):
+def hello(request):
     print(request)
-    return "List of posts"
+    return "hello world"
 
