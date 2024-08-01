@@ -1,6 +1,13 @@
 from ninja import Schema
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
+from pydantic import BaseModel
+
+
+class CommentAnalyticsSchema(BaseModel):
+    date: date
+    total_comments: int
+    blocked_comments: int
 
 
 class CommentEntryCreateSchema(Schema):

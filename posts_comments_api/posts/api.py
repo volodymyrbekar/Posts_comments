@@ -1,5 +1,4 @@
 from typing import List
-
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja_jwt.authentication import JWTAuth
@@ -13,12 +12,16 @@ from .schemas import (
 )
 from .models import PostEntry
 
+from toxicity_checker import is_toxic
+
 router = Router()
 
 
 # /api/posts/create
 @router.post("/create", response=PostsEntryDetailSchema, auth=JWTAuth())
 def create_post(request, post: PostsEntryCreateSchema):
+    if is_toxic(post.content):
+        return {"message": "The post contains toxic content and has been blocked."}
     new_post = PostEntry.objects.create(**post.dict())
     return {"id": new_post.id,
             "title": new_post.title,

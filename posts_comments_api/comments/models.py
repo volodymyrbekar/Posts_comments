@@ -11,6 +11,7 @@ class Comments(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_blocked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.content

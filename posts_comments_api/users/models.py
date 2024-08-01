@@ -4,7 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-
+    auto_reply_enabled = models.BooleanField(default=False)
+    auto_reply_delay = models.IntegerField(default=0)  # delay in minutes
+    auto_reply_message = models.TextField(null=True, blank=True)  # message to be sent as a reply
     class Meta:
         db_table = 'users'
 
