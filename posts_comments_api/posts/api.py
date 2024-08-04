@@ -35,7 +35,7 @@ def posts_daily_breakdown(request, date_from: str = Query(...), date_to: str = Q
     for post in qs:
         date = post.created_at.date()
         posts_count[date]["total_posts"] += 1
-        if is_toxic(post.content):
+        if post.is_blocked:
             posts_count[date]["blocked_posts"] += 1
 
     result = [{'date': date, **counts} for date, counts in posts_count.items()]
@@ -62,7 +62,7 @@ def create_post_entries(request, post: PostsEntryCreateSchema):
 # /api/posts/list/
 @router.get("/list", response=List[PostsEntryListSchema])
 def list_posts_entries(request):
-    qs = PostEntry.objects.all()
+    qs = PostEntry.objects.filter(is_blocked=False)
     return qs
 
 

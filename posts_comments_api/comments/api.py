@@ -53,6 +53,10 @@ def comments_daily_breakdown(request, date_from: str = Query(...), date_to: str 
 # api/comments/create
 @router.post("/create", response=CommentEntryDetailSchema, auth=JWTAuth())
 def create_comment(request, comment: CommentEntryCreateSchema):
+    try:
+        user = User.objects.get(id=comment.user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"message": "User does not exist."}, status=400)
     is_comment_toxic = is_toxic(comment.content)
     new_comment = Comments.objects.create(**comment.dict(), is_blocked=is_comment_toxic)
     if is_comment_toxic:
@@ -78,7 +82,7 @@ def create_comment(request, comment: CommentEntryCreateSchema):
 # api/comments/list/
 @router.get("/list", response=List[CommentEntryListSchema])
 def list_comments(request):
-    qs = Comments.objects.all()
+    qs = Comments.objects.filter(is_blocked=False)
     return qs
 
 
