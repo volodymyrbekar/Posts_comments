@@ -1,6 +1,7 @@
 from ninja import Router, Query
 from ninja_jwt.authentication import JWTAuth
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from typing import List
 
 from datetime import datetime, timedelta
@@ -52,9 +53,10 @@ def comments_daily_breakdown(request, date_from: str = Query(...), date_to: str 
 # api/comments/create
 @router.post("/create", response=CommentEntryDetailSchema, auth=JWTAuth())
 def create_comment(request, comment: CommentEntryCreateSchema):
-    if is_toxic(comment.content):
-        return {"message": "The comment contains toxic content and has been blocked."}
-    new_comment = Comments.objects.create(**comment.dict())
+    is_comment_toxic = is_toxic(comment.content)
+    new_comment = Comments.objects.create(**comment.dict(), is_blocked=is_comment_toxic)
+    if is_comment_toxic:
+        return JsonResponse({"message": "The comment contains toxic content and has been blocked."}, status=403)
     try:
         user = User.objects.get(id=comment.user_id)
         if user.auto_reply_enabled:
@@ -69,6 +71,7 @@ def create_comment(request, comment: CommentEntryCreateSchema):
             'content': new_comment.content,
             'created_at': new_comment.created_at,
             'updated_at': new_comment.updated_at,
+            'is_blocked': new_comment.is_blocked
             }
 
 

@@ -1,6 +1,9 @@
+from collections import defaultdict
 from typing import List
+from datetime import datetime
 from django.shortcuts import get_object_or_404
-from ninja import Router
+from django.http import JsonResponse
+from ninja import Router, Query
 from ninja_jwt.authentication import JWTAuth
 
 from .schemas import (
@@ -9,6 +12,7 @@ from .schemas import (
     PostsEntryDetailSchema,
     PostsEntryUpdateSchema,
     PostsEntryDeleteSchema,
+    PostsDailyAnalyticsSchema,
 )
 from .models import PostEntry
 
@@ -17,18 +21,41 @@ from toxicity_checker import is_toxic
 router = Router()
 
 
+# /api/posts/daily-breakdown
+@router.get("/daily-breakdown", response=List[PostsDailyAnalyticsSchema])
+def posts_daily_breakdown(request, date_from: str = Query(...), date_to: str = Query(...)):
+    # Convert date_from and date_to to datetime objects
+    date_from = datetime.strptime(date_from, '%Y-%m-%d')
+    date_to = datetime.strptime(date_to, '%Y-%m-%d')
+
+    qs = PostEntry.objects.filter(created_at__range=(date_from, date_to))
+
+    posts_count = defaultdict(lambda: {"total_posts": 0, "blocked_posts": 0})
+
+    for post in qs:
+        date = post.created_at.date()
+        posts_count[date]["total_posts"] += 1
+        if is_toxic(post.content):
+            posts_count[date]["blocked_posts"] += 1
+
+    result = [{'date': date, **counts} for date, counts in posts_count.items()]
+    return result
+
+
 # /api/posts/create
 @router.post("/create", response=PostsEntryDetailSchema, auth=JWTAuth())
-def create_post(request, post: PostsEntryCreateSchema):
-    if is_toxic(post.content):
-        return {"message": "The post contains toxic content and has been blocked."}
-    new_post = PostEntry.objects.create(**post.dict())
+def create_post_entries(request, post: PostsEntryCreateSchema):
+    is_post_toxic = is_toxic(post.content)
+    new_post = PostEntry.objects.create(**post.dict(), is_blocked=is_post_toxic)
+    if is_post_toxic:
+        return JsonResponse({"message": "The post contains toxic content and has been blocked."}, status=403)
     return {"id": new_post.id,
             "title": new_post.title,
             "content": new_post.content,
             "created_at": new_post.created_at,
             "updated_at": new_post.updated_at,
             "user_id": new_post.user_id,
+            "is_blocked": new_post.is_blocked
             }
 
 

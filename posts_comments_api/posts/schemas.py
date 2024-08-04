@@ -1,7 +1,13 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 from ninja import Schema
+
+
+class PostsDailyAnalyticsSchema(Schema):
+    date: date
+    total_posts: int
+    blocked_posts: int
 
 
 class PostsEntryCreateSchema(Schema):

@@ -21,8 +21,7 @@ class UserSchema(Schema):
     email: str = None
 
 
-@api.get("/hello")
+@api.get("/")
 def hello(request):
-    print(request)
     return "hello world"
 
